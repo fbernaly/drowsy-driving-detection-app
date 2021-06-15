@@ -9,14 +9,10 @@ import 'package:native_device_orientation/native_device_orientation.dart';
 class CameraView extends StatefulWidget {
   const CameraView(
       {Key? key,
-      required this.title,
-      required this.customPaint,
       required this.onImage,
       this.initialDirection = CameraLensDirection.back})
       : super(key: key);
 
-  final String title;
-  final CustomPaint? customPaint;
   final Function(InputImage inputImage) onImage;
   final CameraLensDirection initialDirection;
 
@@ -51,19 +47,9 @@ class _CameraViewState extends State<CameraView> {
     if (Platform.isAndroid && currentOrientation == Orientation.landscape) {
       quarterTurns = 2;
     }
-    return Container(
-      color: Colors.black,
-      child: Center(
-        child: Stack(
-          children: [
-            RotatedBox(
-              quarterTurns: quarterTurns,
-              child: CameraPreview(_controller!),
-            ),
-            if (widget.customPaint != null) widget.customPaint!,
-          ],
-        ),
-      ),
+    return RotatedBox(
+      quarterTurns: quarterTurns,
+      child: CameraPreview(_controller!),
     );
   }
 

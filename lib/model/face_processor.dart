@@ -1,20 +1,27 @@
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:just_audio/just_audio.dart';
 
+enum DrowsinessLevel { level0, level1, level2, level3 }
+
 class FaceProcessor {
-  late final AudioPlayer playerLevel1;
-  late final AudioPlayer playerLevel2;
-  late final AudioPlayer playerLevel3;
+  final Function(DrowsinessLevel level) onDetection;
+  final AudioPlayer playerLevel1 = AudioPlayer();
+  final AudioPlayer playerLevel2 = AudioPlayer();
+  final AudioPlayer playerLevel3 = AudioPlayer();
   var _busy = false;
   DateTime? _date;
+  DrowsinessLevel currentLevel = DrowsinessLevel.level0;
 
-  FaceProcessor() {
-    playerLevel1 = AudioPlayer();
+  FaceProcessor({required this.onDetection}) {
     playerLevel1.setAsset('assets/audio/error.mp3');
-    playerLevel2 = AudioPlayer();
     playerLevel2.setAsset('assets/audio/boing.mp3');
-    playerLevel3 = AudioPlayer();
     playerLevel3.setAsset('assets/audio/whistle.mp3');
+  }
+
+  void dispose() {
+    playerLevel1.dispose();
+    playerLevel2.dispose();
+    playerLevel3.dispose();
   }
 
   Future processFace(List<Face> faces) async {
@@ -40,19 +47,23 @@ class FaceProcessor {
       var player = playerLevel3;
       if (duration < 500) {
         // Level 0
+        _notifyChange(DrowsinessLevel.level0);
         return;
       } else if (duration < 2500) {
         // Level 1
         player = playerLevel1;
         player.setVolume(10);
+        _notifyChange(DrowsinessLevel.level1);
       } else if (duration < 5000) {
         // Level 2
         player = playerLevel2;
         player.setVolume(25);
+        _notifyChange(DrowsinessLevel.level2);
       } else {
         // Level 3
         player = playerLevel3;
         player.setVolume(100);
+        _notifyChange(DrowsinessLevel.level3);
       }
 
       if (_busy) return;
@@ -76,6 +87,14 @@ class FaceProcessor {
       final duration = DateTime.now().difference(_date!);
       print('event duration: $duration');
       _date = null;
+      _notifyChange(DrowsinessLevel.level0);
+    }
+  }
+
+  void _notifyChange(DrowsinessLevel level) {
+    if (currentLevel != level) {
+      currentLevel = level;
+      onDetection(level);
     }
   }
 }

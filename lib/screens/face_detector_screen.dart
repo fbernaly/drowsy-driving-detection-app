@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:lottie/lottie.dart';
 
 import 'views/camera_view.dart';
 import 'painters/face_detector_painter.dart';
@@ -21,25 +22,20 @@ class _FaceDetectorScreenState extends State<FaceDetectorScreen> {
   ));
   bool isBusy = false;
   CustomPaint? customPaint;
-  FaceProcessor processor = FaceProcessor();
+  late final FaceProcessor processor =
+      FaceProcessor(onDetection: (level) => setState(() {}));
 
   @override
   void dispose() {
     faceDetector.close();
+    processor.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CameraView(
-        title: 'Face Detector',
-        customPaint: customPaint,
-        onImage: (inputImage) {
-          processImage(inputImage);
-        },
-        initialDirection: CameraLensDirection.front,
-      ),
+      body: body(context),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Colors.red,
         onPressed: () {
@@ -47,6 +43,67 @@ class _FaceDetectorScreenState extends State<FaceDetectorScreen> {
         },
         label: const Text('Stop Driving'),
         icon: const Icon(Icons.stop),
+      ),
+    );
+  }
+
+  Widget body(BuildContext context) {
+    var backgroundColor = Colors.black;
+    var showAnimation = false;
+    switch (processor.currentLevel) {
+      case DrowsinessLevel.level0:
+        backgroundColor = Colors.black;
+        showAnimation = false;
+        break;
+      case DrowsinessLevel.level1:
+        backgroundColor = Colors.yellow;
+        showAnimation = true;
+        break;
+      case DrowsinessLevel.level2:
+        backgroundColor = Colors.orange;
+        showAnimation = true;
+        break;
+      case DrowsinessLevel.level3:
+        backgroundColor = Colors.red;
+        showAnimation = true;
+        break;
+    }
+    return Container(
+      color: backgroundColor,
+      child: Center(
+        child: Stack(
+          children: [
+            CameraView(
+              onImage: (inputImage) => processImage(inputImage),
+              initialDirection: CameraLensDirection.front,
+            ),
+            if (customPaint != null) customPaint!,
+            if (showAnimation) _buzzerAnimation(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buzzerAnimation() {
+    return Positioned(
+      top: 16,
+      right: 16,
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            colors: [
+              Colors.black,
+              Colors.transparent,
+            ],
+          ),
+        ),
+        child: Lottie.asset(
+          'assets/animations/buzzer.json',
+          width: 100,
+          height: 100,
+          fit: BoxFit.fill,
+        ),
       ),
     );
   }
