@@ -4,6 +4,7 @@ import 'package:google_ml_kit/google_ml_kit.dart';
 
 import 'views/camera_view.dart';
 import 'painters/face_detector_painter.dart';
+import '../model/face_processor.dart';
 
 class FaceDetectorScreen extends StatefulWidget {
   const FaceDetectorScreen({Key? key}) : super(key: key);
@@ -20,6 +21,7 @@ class _FaceDetectorScreenState extends State<FaceDetectorScreen> {
   ));
   bool isBusy = false;
   CustomPaint? customPaint;
+  FaceProcessor processor = FaceProcessor();
 
   @override
   void dispose() {
@@ -53,6 +55,7 @@ class _FaceDetectorScreenState extends State<FaceDetectorScreen> {
     if (isBusy) return;
     isBusy = true;
     final faces = await faceDetector.processImage(inputImage);
+    processor.processFace(faces);
     if (inputImage.inputImageData?.size != null &&
         inputImage.inputImageData?.imageRotation != null &&
         mounted) {

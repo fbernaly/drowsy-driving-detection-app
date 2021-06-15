@@ -1,4 +1,6 @@
 PODS:
+  - audio_session (0.0.1):
+    - Flutter
   - camera (0.0.1):
     - Flutter
   - Flutter (1.0.0)
@@ -63,6 +65,8 @@ PODS:
   - GoogleUtilitiesComponents (1.0.0):
     - GoogleUtilities/Logger
   - GTMSessionFetcher/Core (1.5.0)
+  - just_audio (0.0.1):
+    - Flutter
   - MLKitBarcodeScanning (1.2.0):
     - MLKitCommon (~> 2.1)
     - MLKitVision (~> 1.2)
@@ -135,15 +139,20 @@ PODS:
   - nanopb/encode (2.30908.0)
   - native_device_orientation (0.0.1):
     - Flutter
+  - path_provider (0.0.1):
+    - Flutter
   - PromisesObjC (1.2.12)
   - Protobuf (3.17.0)
   - SSZipArchive (2.4.2)
 
 DEPENDENCIES:
+  - audio_session (from `.symlinks/plugins/audio_session/ios`)
   - camera (from `.symlinks/plugins/camera/ios`)
   - Flutter (from `Flutter`)
   - google_ml_kit (from `.symlinks/plugins/google_ml_kit/ios`)
+  - just_audio (from `.symlinks/plugins/just_audio/ios`)
   - native_device_orientation (from `.symlinks/plugins/native_device_orientation/ios`)
+  - path_provider (from `.symlinks/plugins/path_provider/ios`)
 
 SPEC REPOS:
   trunk:
@@ -175,16 +184,23 @@ SPEC REPOS:
     - SSZipArchive
 
 EXTERNAL SOURCES:
+  audio_session:
+    :path: ".symlinks/plugins/audio_session/ios"
   camera:
     :path: ".symlinks/plugins/camera/ios"
   Flutter:
     :path: Flutter
   google_ml_kit:
     :path: ".symlinks/plugins/google_ml_kit/ios"
+  just_audio:
+    :path: ".symlinks/plugins/just_audio/ios"
   native_device_orientation:
     :path: ".symlinks/plugins/native_device_orientation/ios"
+  path_provider:
+    :path: ".symlinks/plugins/path_provider/ios"
 
 SPEC CHECKSUMS:
+  audio_session: 4f3e461722055d21515cf3261b64c973c062f345
   camera: 3164201dc344383e62282964016528c4f5a9ad50
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   google_ml_kit: 3e25499de151048da453504d2b676cfd1c6c6bd0
@@ -194,6 +210,7 @@ SPEC CHECKSUMS:
   GoogleUtilities: f8a43108b38a68eebe8b3540e1f4f2d28843ce20
   GoogleUtilitiesComponents: a69c0b3b369ba443e988141e75ef49d9010b1c80
   GTMSessionFetcher: b3503b20a988c4e20cc189aa798fd18220133f52
+  just_audio: baa7252489dbcf47a4c7cc9ca663e9661c99aafa
   MLKitBarcodeScanning: e9487b3e7c25d0f347dcbf253e7a540478919d9d
   MLKitCommon: 9ed187a042139d51c0d8bf6a8301bb20b375c576
   MLKitDigitalInkRecognition: 013d40403784991eb361d06ac2acae27c384a45c
@@ -212,6 +229,7 @@ SPEC CHECKSUMS:
   MLKitXenoCommon: 7c59efa2b957f40acd06c9d6fc28763de1627c9b
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   native_device_orientation: 3b4cfc9565a7b879cc4fde282b3e27745e852d0d
+  path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
   Protobuf: 7327d4444215b5f18e560a97f879ff5503c4581c
   SSZipArchive: e7b4f3d9e780c2acc1764cd88fbf2de28f26e5b2
