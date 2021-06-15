@@ -1,3 +1,4 @@
+import 'package:drowsy_driving_detection_app/model/events.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -5,6 +6,7 @@ enum DrowsinessLevel { level0, level1, level2, level3 }
 
 class FaceProcessor {
   final Function(DrowsinessLevel level) onDetection;
+  final Function(ClosedEyesEvent event) onEventEnded;
   final AudioPlayer playerLevel1 = AudioPlayer();
   final AudioPlayer playerLevel2 = AudioPlayer();
   final AudioPlayer playerLevel3 = AudioPlayer();
@@ -12,7 +14,7 @@ class FaceProcessor {
   DateTime? _date;
   DrowsinessLevel currentLevel = DrowsinessLevel.level0;
 
-  FaceProcessor({required this.onDetection}) {
+  FaceProcessor({required this.onDetection, required this.onEventEnded}) {
     playerLevel1.setAsset('assets/audio/error.mp3');
     playerLevel2.setAsset('assets/audio/boing.mp3');
     playerLevel3.setAsset('assets/audio/whistle.mp3');
@@ -84,10 +86,16 @@ class FaceProcessor {
 
   void _endEvent() {
     if (_date != null) {
-      final duration = DateTime.now().difference(_date!);
-      print('event duration: $duration');
+      ClosedEyesEvent? event;
+      if (currentLevel != DrowsinessLevel.level0) {
+        final duration = DateTime.now().difference(_date!);
+        event = ClosedEyesEvent(_date!, duration, currentLevel);
+      }
       _date = null;
       _notifyChange(DrowsinessLevel.level0);
+      if (event != null) {
+        onEventEnded(event);
+      }
     }
   }
 

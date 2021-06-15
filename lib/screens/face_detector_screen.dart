@@ -6,6 +6,7 @@ import 'package:lottie/lottie.dart';
 import 'views/camera_view.dart';
 import 'painters/face_detector_painter.dart';
 import '../model/face_processor.dart';
+import '../model/storage.dart';
 
 class FaceDetectorScreen extends StatefulWidget {
   const FaceDetectorScreen({Key? key}) : super(key: key);
@@ -22,8 +23,11 @@ class _FaceDetectorScreenState extends State<FaceDetectorScreen> {
   ));
   bool isBusy = false;
   CustomPaint? customPaint;
-  late final FaceProcessor processor =
-      FaceProcessor(onDetection: (level) => setState(() {}));
+  final storage = Storage();
+  late final FaceProcessor processor = FaceProcessor(
+    onDetection: (level) => setState(() {}),
+    onEventEnded: (event) => storage.events.add(event),
+  );
 
   @override
   void dispose() {
@@ -39,6 +43,7 @@ class _FaceDetectorScreenState extends State<FaceDetectorScreen> {
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Colors.red,
         onPressed: () {
+          storage.store();
           Navigator.pop(context);
         },
         label: const Text('Stop Driving'),
