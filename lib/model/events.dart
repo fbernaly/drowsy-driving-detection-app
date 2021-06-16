@@ -15,6 +15,14 @@ class DrivingEvent {
     };
   }
 
+  Duration totalClosedEyesDuration() {
+    var duration = Duration();
+    for (final event in events) {
+      duration += event.duration;
+    }
+    return duration;
+  }
+
   DrivingEvent.fromJson(Map<String, dynamic> json)
       : startTime = DateTime.fromMillisecondsSinceEpoch(json['startTime']),
         duration = Duration(milliseconds: json['duration']),

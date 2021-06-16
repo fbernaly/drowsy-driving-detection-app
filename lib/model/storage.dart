@@ -23,4 +23,10 @@ class Storage {
         : [];
     return drivings;
   }
+
+  static Future delete(DrivingEvent driving) async {
+    JsonStore jsonStore = JsonStore();
+    await jsonStore
+        .deleteItem('driving-${driving.startTime.millisecondsSinceEpoch}');
+  }
 }
