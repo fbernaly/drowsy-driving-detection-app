@@ -1,10 +1,17 @@
+import 'dart:io';
+
+import 'package:drowsy_driving_detection_app/model/location_manager.dart';
 import 'package:drowsy_driving_detection_app/model/storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:focus_detector/focus_detector.dart';
 import 'package:intl/intl.dart';
+import 'package:latlng/latlng.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import 'face_detector_screen.dart';
 import '../model/events.dart';
+import 'map_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key, required this.title}) : super(key: key);
@@ -66,6 +73,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _drivingCard(DrivingEvent drivingEvent) {
+    final markers = <LatLng>[];
+    for (final event in drivingEvent.events) {
+      if (event.locationData != null &&
+          event.locationData?.longitude != null &&
+          event.locationData?.latitude != null) {
+        markers.add(LatLng(
+            event.locationData!.latitude!, event.locationData!.longitude!));
+      }
+    }
     return Padding(
       padding: EdgeInsets.only(bottom: 8),
       child: Card(
@@ -95,6 +111,17 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: 8),
               Text(
                   'Closing eyes events: ${drivingEvent.events.length} ${drivingEvent.totalClosedEyesDuration().inSeconds > 0 ? 'during ${drivingEvent.totalClosedEyesDuration().localizedString()}' : ''}'),
+              if (markers.isNotEmpty)
+                InkWell(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      'Show Map',
+                      style: TextStyle(color: Theme.of(context).primaryColor),
+                    ),
+                  ),
+                  onTap: () => _showMarkers(markers),
+                ),
             ],
           ),
         ),
@@ -102,9 +129,107 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _startDriving() {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => const FaceDetectorScreen()));
+  void _startDriving() async {
+    final dailyResults = await LocationManager().getDailyResults();
+    if (dailyResults == null ||
+        dailyResults.sunrise == null ||
+        dailyResults.sunset == null) {
+      return;
+    }
+    final now = DateTime.now();
+    final isBeforeSunrise = dailyResults.sunrise!.isAfter(now);
+    final isAfterSunset = now.isAfter(dailyResults.sunset!);
+    final recommended = !isBeforeSunrise && !isAfterSunset;
+    void openDrivingScreen() {
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const FaceDetectorScreen()));
+    }
+
+    if (!recommended) {
+      const title = 'Driver drowsiness detection alert';
+      final message =
+          'Driver drowsiness detection is not recommended ${isBeforeSunrise ? 'before sunrise' : ''}${isAfterSunset ? 'after sunset' : ''}';
+      const cancel = 'Don\'t Allow';
+      const ok = 'Allow';
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          if (Platform.isAndroid) {
+            return AlertDialog(
+              title: Text(title),
+              content: Text(message),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(cancel),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    openDrivingScreen();
+                  },
+                  child: Text(ok),
+                ),
+              ],
+            );
+          } else {
+            return CupertinoAlertDialog(
+              title: Text(title),
+              content: Text(message),
+              actions: <Widget>[
+                CupertinoDialogAction(
+                  child: Text(cancel),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                CupertinoDialogAction(
+                  child: Text(ok),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    openDrivingScreen();
+                  },
+                ),
+              ],
+            );
+          }
+        },
+      );
+    } else {
+      openDrivingScreen();
+    }
+  }
+
+  void _showMarkers(List<LatLng> markers) async {
+    final location = await LocationManager().getLocation();
+
+    if (location == null ||
+        location.latitude == null ||
+        location.longitude == null) {
+      return null;
+    }
+
+    final widget = MapScreen(
+      currentLocation: LatLng(location.latitude!, location.longitude!),
+      markers: markers,
+    );
+
+    if (Platform.isAndroid) {
+      showBarModalBottomSheet(
+          context: context,
+          builder: (context) {
+            return widget;
+          });
+    } else {
+      showCupertinoModalBottomSheet(
+          context: context,
+          builder: (context) {
+            return widget;
+          });
+    }
   }
 
   void _onFocusGained() async {

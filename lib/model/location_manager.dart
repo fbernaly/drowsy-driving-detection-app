@@ -4,7 +4,7 @@ import 'package:location/location.dart';
 class LocationManager {
   Location location = Location();
 
-  Future<DaylightResult?> getDailyResults() async {
+  Future<LocationData?> getLocation() async {
     bool serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
       serviceEnabled = await location.requestService();
@@ -22,8 +22,15 @@ class LocationManager {
     }
 
     LocationData locationData = await location.getLocation();
+    return locationData;
+  }
 
-    if (locationData.latitude == null || locationData.longitude == null) {
+  Future<DaylightResult?> getDailyResults() async {
+    final locationData = await getLocation();
+
+    if (locationData == null ||
+        locationData.latitude == null ||
+        locationData.longitude == null) {
       return null;
     }
 

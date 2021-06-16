@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   camera: ^0.8.1
+  cached_network_image: ^3.0.0
   daylight: ^2.0.0
   focus_detector: ^2.0.0
   google_ml_kit: ^0.6.0
@@ -20,6 +21,8 @@ dependencies:
   just_audio: ^0.7.5
   location: ^4.3.0
   lottie: ^1.0.1
+  map: ^1.0.0
+  modal_bottom_sheet: ^2.0.0
   native_device_orientation: ^1.0.0
 
 dev_dependencies:
