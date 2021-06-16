@@ -32,6 +32,8 @@
     <string>To take photos and video with your camera</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>To take video with your camera</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>To know your location when driving</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

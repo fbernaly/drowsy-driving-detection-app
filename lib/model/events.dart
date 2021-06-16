@@ -1,3 +1,5 @@
+import 'package:location/location.dart';
+
 import 'face_processor.dart';
 
 class DrivingEvent {
@@ -38,6 +40,7 @@ class ClosedEyesEvent {
   final DateTime startTime;
   final Duration duration;
   final DrowsinessLevel level;
+  LocationData? locationData;
 
   ClosedEyesEvent(this.startTime, this.duration, this.level);
 
@@ -46,13 +49,16 @@ class ClosedEyesEvent {
       'startTime': startTime.millisecondsSinceEpoch,
       'duration': duration.inMilliseconds,
       'level': level.index,
+      'locationData': locationData?.toJson() ?? <String, dynamic>{}
     };
   }
 
   ClosedEyesEvent.fromJson(Map<String, dynamic> json)
       : startTime = DateTime.fromMillisecondsSinceEpoch(json['startTime']),
         duration = Duration(milliseconds: json['duration']),
-        level = DrowsinessLevel.values[json['level']];
+        level = DrowsinessLevel.values[json['level']],
+        locationData =
+            LocationData.fromMap(json['locationData'] ?? <String, dynamic>{});
 
   static List<ClosedEyesEvent> fromJsonList(dynamic json) {
     List<ClosedEyesEvent> events = [];
@@ -65,5 +71,27 @@ class ClosedEyesEvent {
   @override
   String toString() {
     return 'ClosedEyesEvent{startTime: $startTime, duration: $duration, level: $level}';
+  }
+}
+
+extension LocationDataExtension on LocationData {
+  Map<String, dynamic> toJson() {
+    return {
+      'latitude': latitude,
+      'longitude': longitude,
+      'accuracy': accuracy,
+      'altitude': altitude,
+      'speed': speed,
+      'speed_accuracy': speedAccuracy,
+      'heading': heading,
+      'time': time,
+      'isMock': isMock == true ? 1 : 0,
+      'verticalAccuracy': verticalAccuracy,
+      'headingAccuracy': headingAccuracy,
+      'elapsedRealtimeNanos': elapsedRealtimeNanos,
+      'elapsedRealtimeUncertaintyNanos': elapsedRealtimeUncertaintyNanos,
+      'satelliteNumber': satelliteNumber,
+      'provider': provider
+    };
   }
 }

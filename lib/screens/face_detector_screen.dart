@@ -1,11 +1,16 @@
+import 'dart:io';
+
 import 'package:camera/camera.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:lottie/lottie.dart';
 
 import 'views/camera_view.dart';
 import 'painters/face_detector_painter.dart';
+import '../model/events.dart';
 import '../model/face_processor.dart';
+import '../model/location_manager.dart';
 import '../model/storage.dart';
 
 class FaceDetectorScreen extends StatefulWidget {
@@ -26,8 +31,16 @@ class _FaceDetectorScreenState extends State<FaceDetectorScreen> {
   final storage = Storage();
   late final FaceProcessor processor = FaceProcessor(
     onDetection: (level) => setState(() {}),
-    onEventEnded: (event) => storage.events.add(event),
+    onEventEnded: _addClosedEyesEvent,
   );
+  final locationManager = LocationManager();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _getDailyResults();
+  }
 
   @override
   void dispose() {
@@ -133,6 +146,78 @@ class _FaceDetectorScreenState extends State<FaceDetectorScreen> {
     isBusy = false;
     if (mounted) {
       setState(() {});
+    }
+  }
+
+  void _addClosedEyesEvent(ClosedEyesEvent event) async {
+    event.locationData = await locationManager.location.getLocation();
+    storage.events.add(event);
+  }
+
+  void _getDailyResults() async {
+    final dailyResults = await locationManager.getDailyResults();
+    if (dailyResults == null ||
+        dailyResults.sunrise == null ||
+        dailyResults.sunset == null) {
+      return;
+    }
+    final now = DateTime.now();
+    final isBeforeSunrise = dailyResults.sunrise!.isAfter(now);
+    final isAfterSunset = now.isAfter(dailyResults.sunset!);
+    final recommended = !isBeforeSunrise && !isAfterSunset;
+    if (!recommended) {
+      const title = 'Driver drowsiness detection alert';
+      final message =
+          'Driver drowsiness detection is not recommended ${isBeforeSunrise ? 'before sunrise' : ''}${isAfterSunset ? 'after sunset' : ''}';
+      const cancel = 'Don\'t Allow';
+      const ok = 'Allow';
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          if (Platform.isAndroid) {
+            return AlertDialog(
+              title: Text(title),
+              content: Text(message),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(cancel),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(ok),
+                ),
+              ],
+            );
+          } else {
+            return CupertinoAlertDialog(
+              title: Text(title),
+              content: Text(message),
+              actions: <Widget>[
+                CupertinoDialogAction(
+                  child: Text(cancel),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                  },
+                ),
+                CupertinoDialogAction(
+                  child: Text(ok),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          }
+        },
+      );
     }
   }
 }
